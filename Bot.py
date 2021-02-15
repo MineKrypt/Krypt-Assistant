@@ -1,5 +1,5 @@
 import discord
-import requests
+#import requests
 import json
 import os
 import pathlib
@@ -28,6 +28,12 @@ async def on_command_error(ctx, error):
         return
     raise error
 
+@client.command(aliases=('shutdown', 'stop', 'close'), hidden=True, description='Kills instance.')
+async def kill(ctx):
+    print('Shutting down...')
+    await ctx.send('Stopped!')
+    await client.close()
+
 @client.command(brief='')
 async def info(ctx):
     await ctx.send('MineKrypt\'s Assistant | Prefix: , | Made for DisRoom™')
@@ -42,8 +48,11 @@ async def ping(ctx):
 
 @client.command()
 async def echo(ctx, echoed):
-    # outchannel = client.get_channel(channelid)
-    # await outchannel.send(echoed)
+    await ctx.send(echoed)
+
+@client.command()
+async def echos(ctx, echoed):
+    await ctx.channel.purge(limit='1')
     await ctx.send(echoed)
 
 # @client.command()
@@ -52,19 +61,24 @@ async def echo(ctx, echoed):
 #     await ctx.send('Closing now! Please allow a few seconds.')
 #     await client.close()
 
-#^ FUCKING FUCK YOU RETARDED ASS API JSON BITCH GET THE FUCK OUT OF MY CODE
-@client.command(aliases=('coronavirus', 'c19', 'covid'), brief='Depracated.')
-async def covid19(ctx, *, country='totals'):
-    url = f'https://covid-19-data.p.rapidapi.com/{country}'
-    headers = {
-        'x-rapidapi-key': '3950f2e5dcmsh92ecc9237a24cc1p1b99cajsn2f9a713cf54b',
-        'x-rapidapi-host': 'covid-19-data.p.rapidapi.com'
-        }
-    response = requests.request('GET', url, headers=headers)
-#    cases = {"confirmed":,"critical":,"deaths":,"recovered":}
-    print(response.text.confirmed)
-#    print(cases["critical"], sep=' | ')
+# #^ FUCKING FUCK YOU RETARDED ASS API JSON BITCH GET THE FUCK OUT OF MY CODE
+# @client.command(aliases=('coronavirus', 'c19', 'covid'), brief='Depracated.')
+# async def covid19(ctx, *, country='totals'):
+#     url = f'https://covid-19-data.p.rapidapi.com/{country}'
+#     headers = {
+#         'x-rapidapi-key': '3950f2e5dcmsh92ecc9237a24cc1p1b99cajsn2f9a713cf54b',
+#         'x-rapidapi-host': 'covid-19-data.p.rapidapi.com'
+#         }
+#     response = requests.request('GET', url, headers=headers)
+# #    cases = {"confirmed":,"critical":,"deaths":,"recovered":}
+#     print(response.text.confirmed)
+# #    print(cases["critical"], sep=' | ')
 
+
+#! To prepare files for push: $ git commit -am " "
+#! To push files (This automatically runs the bot as well): $ git push heroku master
+#! To view logs/console: $ heroku logs
+#! To only run: $ heroku run Bot.py
 
 
 client.run('NzIxOTgxOTQzMzY4OTA4ODEw.XuccFQ.exVUTT9Lz7VwZYmmE_TROLnrP80')
