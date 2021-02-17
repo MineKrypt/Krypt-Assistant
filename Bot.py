@@ -3,7 +3,7 @@ import requests
 import json
 import os
 import pathlib
-import asyncio
+from datetime import datetime
 from googlesearch import search
 from discord.ext import commands, tasks
 from discord.ext.commands import CommandNotFound
@@ -20,11 +20,23 @@ print(r'- - - - - - - - - - - - - - - - - - - - - - - - - -')
 def is_owner(ctx):
     return ctx.message.author.id == 440068179994083328
 
+
+
 #! Events
+
+snipe_message_author = {}
+snipe_message_content = {}
+
+@client.event
+async def on_message_delete(message):
+     snipe_message_author[message.channel.id] = message.author
+     snipe_message_content[message.channel.id] = message.content
+     del snipe_message_author[message.channel.id]
+     del snipe_message_content[message.channel.id]
 
 @client.event
 async def on_ready():
-    await client.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.watching, name='MineKrypt die inside'))
+    await client.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.watching, name='for commands'))
     print(r'Started.')
 
 @client.event
@@ -36,16 +48,15 @@ async def on_command_error(ctx, error):
 
 #! Commands
 
-@client.command(aliases=('shutdown', 'stop', 'close'), hidden=True, description='Kills instance.')
+@client.command(aliases=('stop', 'kill', 'close'))
 @commands.check(is_owner)
-async def kill(ctx):
-    print('Shutting down...')
-    await ctx.send('Stopped!')
-    await client.close()
+async def shutdown(ctx):
+    await ctx.send('Closing now...')
+    await client.logout()
 
-@client.command(brief='')
+@client.command()
 async def info(ctx):
-    await ctx.send('MineKrypt\'s Assistant | Prefix: , | Made for DisRoom™')
+    await ctx.send('| MineKrypt\'s Assistant | Prefix: , | Made for DisRoom™ | v1.6')
 
 @client.command(brief='Displays the invite code.', aliases=('invite', 'i'))
 async def inv(ctx):
@@ -63,6 +74,15 @@ async def echo(ctx, echoed):
 async def echos(ctx, echoed):
     await ctx.message.delete()
     await ctx.send(echoed)
+
+@client.command()
+async def uptime(ctx):
+    now = datetime.utcnow()
+    elapsed = now - starttime
+    seconds = elapsed.seconds
+    minutes, seconds = divmod(seconds, 60)
+    hours, minutes = divmod(minutes, 60)
+    await ctx.send("Running for {}d {}h {}m {}s".format(elapsed.days, hours, minutes, seconds))
 
 @client.command()
 @commands.cooldown(1, 5)
@@ -95,7 +115,6 @@ async def userinfo(ctx, member: discord.Member):
 async def serverinfo(ctx):
     name = str(ctx.guild.name)
 
-    owner = str(ctx.guild.owner)
     id = str(ctx.guild.id)
     region = str(ctx.guild.region)
     memberCount = str(ctx.guild.member_count)
@@ -122,10 +141,11 @@ async def serverinfo(ctx):
 @commands.cooldown(1, 20)
 async def find(ctx,*, query):
     author = ctx.author.mention
-    await ctx.channel.send(f"Here are the links related to your question {author} !") 
+    await ctx.channel.send(f'Here are the links related to your question {author} ! *Query: "{query}"*')
     async with ctx.typing():
         for j in search(query, tld="com", num=3, stop=3, pause=2):
-            await ctx.send(f"\n:point_right: {j}")
+            await ctx.send(f"\n:zap: | {j}")
+
     @find.error
     async def find_error(ctx, error):
         if isinstance(error, commands.CommandOnCooldown):
@@ -147,25 +167,35 @@ async def setgame(ctx, *, game='null'):
         if isinstance(error, commands.CommandOnCooldown):
             await ctx.send(f'This command is on cooldown, but you can use it again in {round(error.retry_after, 2)} seconds!')
 
-# @client.command()
-# @client.is_owner()
-# async def close(ctx):
-#     await ctx.send('Closing now! Please allow a few seconds.')
-#     await client.close()
+@client.command()
+@commands.cooldown(1, 10)
+async def snipe(ctx):
+    channel = ctx.channel
+    try: #This piece of code is run if the bot finds anything in the dictionary
+        em = discord.Embed(name = f"Last deleted message in #{channel.name}", description = snipe_message_content[channel.id])
+        em.set_footer(text = f"This message was sent by {snipe_message_author[channel.id]}")
+        await ctx.send(embed = em)
+    except: #This piece of code is run if the bot doesn't find anything in the dictionary
+        await ctx.send(f"I couldn't find any recently deleted messages in #{channel.name} !")
 
-# @client.command(aliases=('coronavirus', 'c19', 'covid'), brief='Depracated.')
-# async def covid19(ctx, *, country='totals'):
-#     url = f'https://covid-19-data.p.rapidapi.com/{country}'
-#     headers = {
-#         'x-rapidapi-key': '3950f2e5dcmsh92ecc9237a24cc1p1b99cajsn2f9a713cf54b',
-#         'x-rapidapi-host': 'covid-19-data.p.rapidapi.com'
-#         }
-#     response = requests.request('GET', url, headers=headers)
-# #    cases = {"confirmed":,"critical":,"deaths":,"recovered":}
-#     print(response.text)
-#     parsed = (json.loads(response))
-#     print(json.dumps(parsed, indent=5, sort_keys=False))
-# #    print(cases["critical"], sep=' | ')
+    @snipe.error
+    async def snipe_error(ctx, error):
+        if isinstance(error, commands.CommandOnCooldown):
+            await ctx.send(f'This command is on cooldown, but you can use it again in {round(error.retry_after, 2)} seconds!')
+
+@client.command()
+async def dm(ctx, member: discord.Member=None):
+  if member == None:
+    await ctx.send('Mention a member')
+    return
+  try:
+    for a in range(5):
+      await member.send("text")
+
+  except commands.CommandInvokeError:
+      await ctx.send("Couldn't send message to user")
+
+
 
 
 #! To prepare files for push: $ git commit -am " "
@@ -173,4 +203,5 @@ async def setgame(ctx, *, game='null'):
 #! To view logs/console: $ heroku logs
 #! To only run: $ heroku run Bot.py
 
+starttime = datetime.utcnow()
 client.run('NzIxOTgxOTQzMzY4OTA4ODEw.XuccFQ.exVUTT9Lz7VwZYmmE_TROLnrP80')
