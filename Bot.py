@@ -3,6 +3,8 @@ import requests
 import json
 import os
 import pathlib
+import psutil
+import platform
 from datetime import datetime
 from googlesearch import search
 from discord.ext import commands, tasks
@@ -19,6 +21,14 @@ print(r'Directory   Path: ', dirPath)
 print(r'- - - - - - - - - - - - - - - - - - - - - - - - - -')
 def is_owner(ctx):
     return ctx.message.author.id == 440068179994083328
+
+def get_size(bytes, suffix="B"):
+    factor = 1024
+    for unit in ["", "K", "M", "G", "T", "P"]:
+        if bytes < factor:
+            return f"{bytes:.2f}{unit}{suffix}"
+        bytes /= factor
+
 
 
 
@@ -48,12 +58,6 @@ async def on_command_error(ctx, error):
 
 #! Commands
 
-@client.command(aliases=('stop', 'kill', 'close'))
-@commands.check(is_owner)
-async def shutdown(ctx):
-    await ctx.send('Closing now...')
-    await client.logout()
-
 @client.command()
 async def info(ctx):
     await ctx.send('| MineKrypt\'s Assistant | Prefix: , | Made for DisRoom™ | v1.6')
@@ -66,7 +70,7 @@ async def inv(ctx):
 async def ping(ctx):
     await ctx.send(f'Latency: *{round(client.latency * 1000)}ms*')
 
-@client.command()
+@client.command(aliases=('say', 'rpt'))
 async def echo(ctx, echoed):
     await ctx.send(echoed)
 
@@ -138,7 +142,7 @@ async def serverinfo(ctx):
             await ctx.send(f'This command is on cooldown, but you can use it again in {round(error.retry_after, 2)} seconds!')
 
 @client.command(aliases=('search', 'google'))
-@commands.cooldown(1, 20)
+@commands.cooldown(1, 30)
 async def find(ctx,*, query):
     author = ctx.author.mention
     await ctx.channel.send(f'Here are the links related to your question {author} ! *Query: "{query}"*')
@@ -184,17 +188,35 @@ async def snipe(ctx):
             await ctx.send(f'This command is on cooldown, but you can use it again in {round(error.retry_after, 2)} seconds!')
 
 @client.command()
-async def dm(ctx, member: discord.Member=None):
+@commands.check(is_owner)
+async def dm(ctx, member: discord.Member=None, message=''):
   if member == None:
-    await ctx.send('Mention a member')
+    await ctx.send('Mention a member, please!')
     return
   try:
-    for a in range(5):
-      await member.send("text")
+      await member.send(f"{message}")
+      await ctx.send(f'Message delivered to: {member}')
 
   except commands.CommandInvokeError:
       await ctx.send("Couldn't send message to user")
 
+@client.command(aliagses=('serverinfo', 'host'))
+async def server(ctx):
+    cpufreq = psutil.cpu_freq()
+    cpuphys = psutil.cpu_count(logical=False)
+    cpucores = psutil.cpu_count(logical=True)
+    svmem = psutil.virtual_memory()
+    uname = platform.uname()
+    async with ctx.typing():
+        await ctx.send(f'============== CPU =============== \n **Physical cores:** {cpuphys} \n **Total cores:** {cpucores} \n **Current Frequency:** {cpufreq.current:.2f}Mhz \n **Max Frequency:** {cpufreq.max:.2f}Mhz \n **Min Frequency:** {cpufreq.min:.2f}Mhz \n **Total CPU Usage:** {psutil.cpu_percent()}%')
+        await ctx.send(f'============== Mem =============== \n **Total:** {get_size(svmem.total)} \n **Used:** {get_size(svmem.used)} \n **Percentage:** {svmem.percent}%')
+        await ctx.send(f'============== Sys =============== \n **System:** {uname.system} \n **Node Name:** {uname.node} \n **Release:** {uname.release} \n **Version:** {uname.version} \n **Machine:** {uname.machine} \n **Processor:** {uname.processor}')
+
+@client.command(aliases=["shut", "shutdown", "quit", "stahp", "kill"])
+@commands.check(is_owner)
+async def stop(ctx):
+   await ctx.send("Attention: I have been murdered.")
+   await client.close()
 
 
 
