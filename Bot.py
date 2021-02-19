@@ -1,15 +1,15 @@
-import discord
-import requests
-import json
+import discord #Discord.py
+import requests #Web requests
+import json #Parse json
 import os
-import pathlib
-import psutil
-import platform
+import pathlib #Reach files
+import psutil #OS info
+import platform #OS info
 from datetime import datetime
-from googlesearch import search
-from discord.ext import commands, tasks
-from discord.ext.commands import CommandNotFound
-from discord.ext.commands.cooldowns import BucketType
+from googlesearch import search #Google search
+from discord.ext import commands, tasks #Discord.py commands
+from discord.ext.commands import CommandNotFound #Discord.py errors
+from discord.ext.commands.cooldowns import BucketType #Discord.py cooldowns
 pathlib.Path(__file__).parent.absolute()
 filePath = pathlib.Path(__file__).absolute() #Current file's path
 dirPath = pathlib.Path().absolute() #Current parent's path
@@ -19,7 +19,7 @@ print(r'◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼
 print(r'File        Path: ', filePath)
 print(r'Directory   Path: ', dirPath)
 print(r'- - - - - - - - - - - - - - - - - - - - - - - - - -')
-def is_owner(ctx):
+def is_owner(ctx): #Discord user ID's granted admin permissions
     return ctx.message.author.id == 440068179994083328
 
 def get_size(bytes, suffix="B"):
@@ -29,28 +29,23 @@ def get_size(bytes, suffix="B"):
             return f"{bytes:.2f}{unit}{suffix}"
         bytes /= factor
 
-
-
-
 #! Events
 
 snipe_message_author = {}
 snipe_message_content = {}
 
 @client.event
-async def on_message_delete(message):
+async def on_message_delete(message): #Getting the messages for the snipe command
      snipe_message_author[message.channel.id] = message.author
      snipe_message_content[message.channel.id] = message.content
-     del snipe_message_author[message.channel.id]
-     del snipe_message_content[message.channel.id]
 
 @client.event
-async def on_ready():
+async def on_ready(): #This will execute when the bot comes online
     await client.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.watching, name='for commands'))
     print(r'Started.')
 
 @client.event
-async def on_command_error(ctx, error):
+async def on_command_error(ctx, error): #Executes when a command
     if isinstance(error, CommandNotFound):
         await ctx.send('Command not recognised!')
         return
@@ -59,28 +54,28 @@ async def on_command_error(ctx, error):
 #! Commands
 
 @client.command()
-async def info(ctx):
-    await ctx.send('| MineKrypt\'s Assistant | Prefix: , | Made for DisRoom™ | v1.6')
+async def info(ctx): #This will show some information about the bot
+    await ctx.send('| MineKrypt\'s Assistant | Prefix: , | Made for DisRoom™ | v1.10')
 
 @client.command(brief='Displays the invite code.', aliases=('invite', 'i'))
-async def inv(ctx):
+async def inv(ctx): #This will give an invite
     await ctx.send('Join DisRoom™! | discord.gg/7tJq6xH')
 
 @client.command(aliases=('latency', 'p'))
-async def ping(ctx):
+async def ping(ctx): #This will show the latency to discord
     await ctx.send(f'Latency: *{round(client.latency * 1000)}ms*')
 
 @client.command(aliases=('say', 'rpt'))
-async def echo(ctx, echoed):
+async def echo(ctx, echoed): #This will repeat text
     await ctx.send(echoed)
 
 @client.command()
-async def echos(ctx, echoed):
+async def echos(ctx, echoed): #This will repeat text and delete the original command
     await ctx.message.delete()
     await ctx.send(echoed)
 
 @client.command()
-async def uptime(ctx):
+async def uptime(ctx): #This will show how long the bot has been online
     now = datetime.utcnow()
     elapsed = now - starttime
     seconds = elapsed.seconds
@@ -90,7 +85,7 @@ async def uptime(ctx):
 
 @client.command()
 @commands.cooldown(1, 5)
-async def userinfo(ctx, member: discord.Member):
+async def userinfo(ctx, member: discord.Member): #This will get information about a user
     roles = [role for role in member.roles]
  
     embed = discord.Embed(colour = member.color, timestamp=ctx.message.created_at)
@@ -116,7 +111,7 @@ async def userinfo(ctx, member: discord.Member):
 
 @client.command()
 @commands.cooldown(1, 5)
-async def serverinfo(ctx):
+async def serverinfo(ctx): #This will get information about the server
     name = str(ctx.guild.name)
 
     id = str(ctx.guild.id)
@@ -143,7 +138,7 @@ async def serverinfo(ctx):
 
 @client.command(aliases=('search', 'google'))
 @commands.cooldown(1, 30)
-async def find(ctx,*, query):
+async def find(ctx,*, query): #This will retrieve google results for a query
     author = ctx.author.mention
     await ctx.channel.send(f'Here are the links related to your question {author} ! *Query: "{query}"*')
     async with ctx.typing():
@@ -155,13 +150,10 @@ async def find(ctx,*, query):
         if isinstance(error, commands.CommandOnCooldown):
             await ctx.send(f'This command is on cooldown, but you can use it again in {round(error.retry_after, 2)} seconds!')
 
-
-
-
 @client.command()
 @commands.cooldown(1, 20)
 @commands.check(is_owner)
-async def setgame(ctx, *, game='null'):
+async def setgame(ctx, *, game='null'): #This will set the game activity or "playing ..."
     await client.change_presence(status=discord.Status.online, activity=discord.Game(f'{game}'))
     await ctx.send(f'My game activity is now: {game}')
     print(f'My game activity is now: {game}')
@@ -173,7 +165,7 @@ async def setgame(ctx, *, game='null'):
 
 @client.command()
 @commands.cooldown(1, 10)
-async def snipe(ctx):
+async def snipe(ctx): #This will retrieve a recently deleted message in the channel it is used.
     channel = ctx.channel
     try: #This piece of code is run if the bot finds anything in the dictionary
         em = discord.Embed(name = f"Last deleted message in #{channel.name}", description = snipe_message_content[channel.id])
@@ -189,7 +181,7 @@ async def snipe(ctx):
 
 @client.command()
 @commands.check(is_owner)
-async def dm(ctx, member: discord.Member=None, message=''):
+async def dm(ctx, member: discord.Member=None, message=''): #This will direct message a user
   if member == None:
     await ctx.send('Mention a member, please!')
     return
@@ -201,7 +193,7 @@ async def dm(ctx, member: discord.Member=None, message=''):
       await ctx.send("Couldn't send message to user")
 
 @client.command(aliagses=('serverinfo', 'host'))
-async def server(ctx):
+async def server(ctx): #This will show information about the host machine
     cpufreq = psutil.cpu_freq()
     cpuphys = psutil.cpu_count(logical=False)
     cpucores = psutil.cpu_count(logical=True)
@@ -214,7 +206,7 @@ async def server(ctx):
 
 @client.command(aliases=["shut", "shutdown", "quit", "stahp", "kill"])
 @commands.check(is_owner)
-async def stop(ctx):
+async def stop(ctx): #This will stop the bot's process
    await ctx.send("Attention: I have been murdered.")
    await client.close()
 
