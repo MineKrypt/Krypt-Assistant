@@ -200,7 +200,7 @@ async def dm(ctx, member: discord.Member=None, message=''): #This will direct me
       await ctx.send("Couldn't send message to user")
 
 @client.command(aliagses=('serverinfo', 'host'))
-@commands.cooldown(1, 30    )
+@commands.cooldown(1, 30)
 async def server(ctx): #This will show information about the host machine
     cpufreq = psutil.cpu_freq()
     cpuphys = psutil.cpu_count(logical=False)
@@ -217,12 +217,6 @@ async def server(ctx): #This will show information about the host machine
 async def stop(ctx): #This will stop the bot's process
    await ctx.send("Attention: I have been murdered.")
    await client.close()
-
-
-#! To prepare files for push: $ git commit -am " "
-#! To push files (This automatically runs the bot as well): $ git push heroku master
-#! To view logs/console: $ heroku logs
-#! To only run: $ heroku run Bot.py
 
 startTime = datetime.utcnow()
 tokenFile = open(realPath/r'token.txt', 'r')
