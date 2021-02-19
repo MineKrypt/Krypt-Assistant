@@ -54,27 +54,33 @@ async def on_command_error(ctx, error): #Executes when a command
 #! Commands
 
 @client.command()
+@commands.cooldown(1, 5)
 async def info(ctx): #This will show some information about the bot
     await ctx.send('| MineKrypt\'s Assistant | Prefix: , | Made for DisRoom™ | v1.10')
 
 @client.command(brief='Displays the invite code.', aliases=('invite', 'i'))
+@commands.cooldown(1, 30)
 async def inv(ctx): #This will give an invite
     await ctx.send('Join DisRoom™! | discord.gg/7tJq6xH')
 
 @client.command(aliases=('latency', 'p'))
+@commands.cooldown(1, 5)
 async def ping(ctx): #This will show the latency to discord
     await ctx.send(f'Latency: *{round(client.latency * 1000)}ms*')
 
 @client.command(aliases=('say', 'rpt'))
+@commands.cooldown(1, 5)
 async def echo(ctx, echoed): #This will repeat text
     await ctx.send(echoed)
 
 @client.command()
+@commands.cooldown(1, 5)
 async def echos(ctx, echoed): #This will repeat text and delete the original command
     await ctx.message.delete()
     await ctx.send(echoed)
 
 @client.command()
+@commands.cooldown(1, 5)
 async def uptime(ctx): #This will show how long the bot has been online
     now = datetime.utcnow()
     elapsed = now - starttime
@@ -87,13 +93,13 @@ async def uptime(ctx): #This will show how long the bot has been online
 @commands.cooldown(1, 5)
 async def userinfo(ctx, member: discord.Member): #This will get information about a user
     roles = [role for role in member.roles]
- 
+
     embed = discord.Embed(colour = member.color, timestamp=ctx.message.created_at)
- 
+
     embed.set_author(name=f"User Info - {member}")
     embed.set_thumbnail(url=member.avatar_url)
     embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar_url)
- 
+
     embed.add_field(name="ID:", value=member.id)
     embed.add_field(name="Guild name:", value=member.display_name)
     embed.add_field(name="Created at:", value=member.created_at.strftime("%a, %#d %B, %Y, %I:%M %p UTC"))
@@ -101,7 +107,7 @@ async def userinfo(ctx, member: discord.Member): #This will get information abou
     embed.add_field(name=f"Roles ({len(roles)})", value=" ".join([role.mention for role in roles]))
     embed.add_field(name="Top role:", value=member.top_role.mention)
     embed.add_field(name="Bot?", value=member.bot)
- 
+
     await ctx.send(embed=embed)
 
     @userinfo.error
@@ -151,7 +157,7 @@ async def find(ctx,*, query): #This will retrieve google results for a query
             await ctx.send(f'This command is on cooldown, but you can use it again in {round(error.retry_after, 2)} seconds!')
 
 @client.command()
-@commands.cooldown(1, 20)
+@commands.cooldown(1, 30)
 @commands.check(is_owner)
 async def setgame(ctx, *, game='null'): #This will set the game activity or "playing ..."
     await client.change_presence(status=discord.Status.online, activity=discord.Game(f'{game}'))
@@ -180,6 +186,7 @@ async def snipe(ctx): #This will retrieve a recently deleted message in the chan
             await ctx.send(f'This command is on cooldown, but you can use it again in {round(error.retry_after, 2)} seconds!')
 
 @client.command()
+@commands.cooldown(1, 15)
 @commands.check(is_owner)
 async def dm(ctx, member: discord.Member=None, message=''): #This will direct message a user
   if member == None:
@@ -193,6 +200,7 @@ async def dm(ctx, member: discord.Member=None, message=''): #This will direct me
       await ctx.send("Couldn't send message to user")
 
 @client.command(aliagses=('serverinfo', 'host'))
+@commands.cooldown(1, 30)
 async def server(ctx): #This will show information about the host machine
     cpufreq = psutil.cpu_freq()
     cpuphys = psutil.cpu_count(logical=False)
@@ -202,14 +210,13 @@ async def server(ctx): #This will show information about the host machine
     async with ctx.typing():
         await ctx.send(f'============== CPU =============== \n **Physical cores:** {cpuphys} \n **Total cores:** {cpucores} \n **Current Frequency:** {cpufreq.current:.2f}Mhz \n **Max Frequency:** {cpufreq.max:.2f}Mhz \n **Min Frequency:** {cpufreq.min:.2f}Mhz \n **Total CPU Usage:** {psutil.cpu_percent()}%')
         await ctx.send(f'============== Mem =============== \n **Total:** {get_size(svmem.total)} \n **Used:** {get_size(svmem.used)} \n **Percentage:** {svmem.percent}%')
-        await ctx.send(f'============== Sys =============== \n **System:** {uname.system} \n **Node Name:** {uname.node} \n **Release:** {uname.release} \n **Version:** {uname.version} \n **Machine:** {uname.machine} \n **Processor:** {uname.processor}')
+        await ctx.send(f'============== Sys =============== \n **System:** {uname.system} \n **Release:** {uname.release} \n **Version:** {uname.version} \n **Machine:** {uname.machine} \n **Processor:** {uname.processor}')
 
 @client.command(aliases=["shut", "shutdown", "quit", "stahp", "kill"])
 @commands.check(is_owner)
 async def stop(ctx): #This will stop the bot's process
    await ctx.send("Attention: I have been murdered.")
    await client.close()
-
 
 
 #! To prepare files for push: $ git commit -am " "
