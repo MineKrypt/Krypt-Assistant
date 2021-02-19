@@ -36,8 +36,8 @@ snipe_message_content = {}
 
 @client.event
 async def on_message_delete(message): #Getting the messages for the snipe command
-     snipe_message_author[message.channel.id] = message.author
-     snipe_message_content[message.channel.id] = message.content
+    snipe_message_author[message.channel.id] = message.author
+    snipe_message_content[message.channel.id] = message.content
 
 @client.event
 async def on_ready(): #This will execute when the bot comes online
@@ -83,7 +83,7 @@ async def echos(ctx, echoed): #This will repeat text and delete the original com
 @commands.cooldown(1, 5)
 async def uptime(ctx): #This will show how long the bot has been online
     now = datetime.utcnow()
-    elapsed = now - starttime
+    elapsed = now - startTime
     seconds = elapsed.seconds
     minutes, seconds = divmod(seconds, 60)
     hours, minutes = divmod(minutes, 60)
@@ -175,7 +175,7 @@ async def snipe(ctx): #This will retrieve a recently deleted message in the chan
     channel = ctx.channel
     try: #This piece of code is run if the bot finds anything in the dictionary
         em = discord.Embed(name = f"Last deleted message in #{channel.name}", description = snipe_message_content[channel.id])
-        em.set_footer(text = f"This message was sent by {snipe_message_author[channel.id]}")
+        em.set_footer(text = f'This message was sent by {snipe_message_author[channel.id]}')
         await ctx.send(embed = em)
     except: #This piece of code is run if the bot doesn't find anything in the dictionary
         await ctx.send(f"I couldn't find any recently deleted messages in #{channel.name} !")
@@ -200,7 +200,7 @@ async def dm(ctx, member: discord.Member=None, message=''): #This will direct me
       await ctx.send("Couldn't send message to user")
 
 @client.command(aliagses=('serverinfo', 'host'))
-@commands.cooldown(1, 30)
+@commands.cooldown(1, 30    )
 async def server(ctx): #This will show information about the host machine
     cpufreq = psutil.cpu_freq()
     cpuphys = psutil.cpu_count(logical=False)
@@ -224,5 +224,8 @@ async def stop(ctx): #This will stop the bot's process
 #! To view logs/console: $ heroku logs
 #! To only run: $ heroku run Bot.py
 
-starttime = datetime.utcnow()
-client.run('NzIxOTgxOTQzMzY4OTA4ODEw.XuccFQ.exVUTT9Lz7VwZYmmE_TROLnrP80')
+startTime = datetime.utcnow()
+tokenFile = open(realPath/r'token.txt', 'r')
+realToken = tokenFile.read()
+client.run(f'{realToken}')
+tokenFile.close()
