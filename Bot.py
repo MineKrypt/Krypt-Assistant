@@ -128,7 +128,7 @@ async def serverinfo(ctx): #This will get information about the server
     
     embed = discord.Embed(
         title=name + " Server Information",
-        color=discord.Color.blue()
+        color=discord.Color.dark_red()
     )
     embed.set_thumbnail(url=icon)
     embed.add_field(name="Server ID", value=id, inline=True)
