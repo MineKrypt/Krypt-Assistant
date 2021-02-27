@@ -29,7 +29,6 @@ def get_size(bytes, suffix="B"):
             return f"{bytes:.2f}{unit}{suffix}"
         bytes /= factor
 
-#this is a test
 #! Events
 
 snipe_message_author = {}
