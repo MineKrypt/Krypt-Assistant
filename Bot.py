@@ -1,10 +1,11 @@
 import discord #Discord.py
 import requests #Web requests
 import json #Parse json
-import os
+import os #os
 import pathlib #Reach files
 import psutil #OS info
 import platform #OS info
+import random
 from datetime import datetime
 from googlesearch import search #Google search
 from discord.ext import commands, tasks #Discord.py commands
@@ -13,12 +14,19 @@ from discord.ext.commands.cooldowns import BucketType #Discord.py cooldowns
 pathlib.Path(__file__).parent.absolute()
 filePath = pathlib.Path(__file__).absolute() #Current file's path
 dirPath = pathlib.Path().absolute() #Current parent's path
-realPath = dirPath/r'Discord/Krypts Assistant'
+realPath = dirPath/r''
 client = commands.Bot(command_prefix = ',', case_insensitive=True) #Prefix
 print(r'◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼◼')
 print(r'File        Path: ', filePath)
 print(r'Directory   Path: ', dirPath)
 print(r'- - - - - - - - - - - - - - - - - - - - - - - - - -')
+
+def cooldown():
+    @userinfo.error
+    async def oncooldown(ctx, error):
+        if isinstance(error, commands.CommandOnCooldown):
+            await ctx.send(f'This command is on cooldown, but you can use it again in {round(error.retry_after, 2)} seconds!')
+
 def is_owner(ctx): #Discord user ID's granted admin permissions
     return ctx.message.author.id == 440068179994083328
 
@@ -45,7 +53,7 @@ async def on_ready(): #This will execute when the bot comes online
     print(r'Started.')
 
 @client.event
-async def on_command_error(ctx, error): #Executes when a command
+async def on_command_error(ctx, error):
     if isinstance(error, CommandNotFound):
         await ctx.send('Command not recognised!')
         return
@@ -54,9 +62,31 @@ async def on_command_error(ctx, error): #Executes when a command
 #! Commands
 
 @client.command()
+@commands.check(is_owner)
+async def newchannel(ctx, name=None, times=1):
+    if name == "random":
+        for i in range(times):
+            randname = random.randint(100000000, 999999999)
+            await ctx.message.guild.create_text_channel(randname)
+    else:
+        for i in range(times):
+            await ctx.message.guild.create_text_channel(name)
+
+@client.command()
+@commands.check(is_owner)
+async def newrole(ctx, name=None, times=1):
+    if name == "random":
+        for i in range(times):
+            randname = random.randint(100000000, 999999999)
+            await ctx.message.guild.create_role(randname)
+    else:
+        for i in range(times):
+            await ctx.message.guild.create_role(name)
+
+@client.command()
 @commands.cooldown(1, 5)
 async def info(ctx): #This will show some information about the bot
-    await ctx.send('| MineKrypt\'s Assistant | Prefix: , | Made for DisRoom™ | v1.10')
+    await ctx.send('| MineKrypt\'s Assistant | Prefix: , | Made for DisRoom™ | v1.13')
 
 @client.command(brief='Displays the invite code.', aliases=('invite', 'i'))
 @commands.cooldown(1, 30)
@@ -107,13 +137,8 @@ async def userinfo(ctx, member: discord.Member): #This will get information abou
     embed.add_field(name=f"Roles ({len(roles)})", value=" ".join([role.mention for role in roles]))
     embed.add_field(name="Top role:", value=member.top_role.mention)
     embed.add_field(name="Bot?", value=member.bot)
-
     await ctx.send(embed=embed)
-
-    @userinfo.error
-    async def userinfo_error(ctx, error):
-        if isinstance(error, commands.CommandOnCooldown):
-            await ctx.send(f'This command is on cooldown, but you can use it again in {round(error.retry_after, 2)} seconds!')
+    cooldown()
 
 @client.command()
 @commands.cooldown(1, 5)
@@ -134,40 +159,28 @@ async def serverinfo(ctx): #This will get information about the server
     embed.add_field(name="Server ID", value=id, inline=True)
     embed.add_field(name="Region", value=region, inline=True)
     embed.add_field(name="Member Count", value=memberCount, inline=True)
-
     await ctx.send(embed=embed)
-
-    @serverinfo.error
-    async def serverinfo_error(ctx, error):
-        if isinstance(error, commands.CommandOnCooldown):
-            await ctx.send(f'This command is on cooldown, but you can use it again in {round(error.retry_after, 2)} seconds!')
+    cooldown()
 
 @client.command(aliases=('search', 'google'))
 @commands.cooldown(1, 30)
 async def find(ctx,*, query): #This will retrieve google results for a query
+
     author = ctx.author.mention
     await ctx.channel.send(f'Here are the links related to your question {author} ! *Query: "{query}"*')
     async with ctx.typing():
         for j in search(query, tld="com", num=3, stop=3, pause=2):
             await ctx.send(f"\n:zap: | {j}")
-
-    @find.error
-    async def find_error(ctx, error):
-        if isinstance(error, commands.CommandOnCooldown):
-            await ctx.send(f'This command is on cooldown, but you can use it again in {round(error.retry_after, 2)} seconds!')
+    cooldown()
 
 @client.command()
 @commands.cooldown(1, 30)
 @commands.check(is_owner)
-async def setgame(ctx, *, game='null'): #This will set the game activity or "playing ..."
+async def setgame(ctx, *, game=''): #This will set the game activity or "playing ..."
     await client.change_presence(status=discord.Status.online, activity=discord.Game(f'{game}'))
     await ctx.send(f'My game activity is now: {game}')
     print(f'My game activity is now: {game}')
-
-    @setgame.error
-    async def setgame_error(ctx, error):
-        if isinstance(error, commands.CommandOnCooldown):
-            await ctx.send(f'This command is on cooldown, but you can use it again in {round(error.retry_after, 2)} seconds!')
+    cooldown()
 
 @client.command()
 @commands.cooldown(1, 10)
@@ -179,11 +192,7 @@ async def snipe(ctx): #This will retrieve a recently deleted message in the chan
         await ctx.send(embed = em)
     except: #This piece of code is run if the bot doesn't find anything in the dictionary
         await ctx.send(f"I couldn't find any recently deleted messages in #{channel.name} !")
-
-    @snipe.error
-    async def snipe_error(ctx, error):
-        if isinstance(error, commands.CommandOnCooldown):
-            await ctx.send(f'This command is on cooldown, but you can use it again in {round(error.retry_after, 2)} seconds!')
+    cooldown()
 
 @client.command()
 @commands.cooldown(1, 15)
@@ -211,6 +220,7 @@ async def server(ctx): #This will show information about the host machine
         await ctx.send(f'============== CPU =============== \n **Physical cores:** {cpuphys} \n **Total cores:** {cpucores} \n **Current Frequency:** {cpufreq.current:.2f}Mhz \n **Max Frequency:** {cpufreq.max:.2f}Mhz \n **Min Frequency:** {cpufreq.min:.2f}Mhz \n **Total CPU Usage:** {psutil.cpu_percent()}%')
         await ctx.send(f'============== Mem =============== \n **Total:** {get_size(svmem.total)} \n **Used:** {get_size(svmem.used)} \n **Percentage:** {svmem.percent}%')
         await ctx.send(f'============== Sys =============== \n **System:** {uname.system} \n **Release:** {uname.release} \n **Version:** {uname.version} \n **Machine:** {uname.machine} \n **Processor:** {uname.processor}')
+    cooldown()
 
 @client.command(aliases=["shut", "shutdown", "quit", "stahp", "kill"])
 @commands.check(is_owner)
