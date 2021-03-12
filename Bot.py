@@ -177,7 +177,6 @@ async def userinfo(ctx, member: discord.Member): #This will get information abou
 async def serverinfo(ctx): #This will get information about the server
     log(content=f'serverinfo', user=ctx.message.author)
     name = str(ctx.guild.name)
-
     id = str(ctx.guild.id)
     region = str(ctx.guild.region)
     memberCount = str(ctx.guild.member_count)
@@ -264,6 +263,8 @@ async def stop(ctx): #This will stop the bot's process
    await ctx.send("Attention: I have been murdered.")
    await client.close()
 
+
+#FixMe
 # @client.command()
 # @commands.check(is_owner)
 # async def logs(lines=10)
