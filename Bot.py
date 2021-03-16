@@ -1,7 +1,7 @@
 import discord #Discord.py
 import requests #Web requests
 import json #Parse json
-import os #os
+import os #osrm -rf .git
 import pathlib #Reach files
 import psutil #OS info
 import platform #OS info
@@ -35,6 +35,7 @@ except IOError:
 def cooldown():
     @userinfo.error
     async def oncooldown(ctx, error):
+        print(oncooldown)
         if isinstance(error, commands.CommandOnCooldown):
             await ctx.send(f'This command is on cooldown, but you can use it again in {round(error.retry_after, 2)} seconds!')
 
@@ -61,15 +62,15 @@ snipe_message_content = {}
 
 @client.event
 async def on_message_delete(message): #Getting the messages for the snipe command
-    snipe_message_author[message.channel.id] = message.author
+    snipe_message_author[ message.channel.id] = message.author
     snipe_message_content[message.channel.id] = message.content
 
 @client.event
 async def on_ready(): #This will execute when the bot comes online
-    await client.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.watching, name='for commands'))
+    await client.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.watching, name='discord.py docs'))
     print(r'Started.')
 
-@client.event
+@client.event 
 async def on_command_error(ctx, error):
     if isinstance(error, CommandNotFound):
         await ctx.send('Command not recognised!')
@@ -87,6 +88,7 @@ async def newchannel(ctx, name=None, times=1):
     log(content=f'newchannel with name={name}, times={times}', user=ctx.message.author)
     if name == "random":
         for i in range(times):
+            print(i)
             randname = random.randint(100000000, 999999999)
             await ctx.message.guild.create_text_channel(randname)
     else:
@@ -102,6 +104,7 @@ async def newrole(ctx, name=None, times=1):
     log(content=f'newrole with name={name}, times={times}', user=ctx.message.author)
     if name == "random":
         for i in range(times):
+            print(i)
             randname = random.randint(100000000, 999999999)
             await ctx.message.guild.create_role(randname)
     else:
@@ -109,10 +112,10 @@ async def newrole(ctx, name=None, times=1):
             await ctx.message.guild.create_role(name)
 
 @client.command()
-@commands.cooldown(1, 5)
+@commands.cooldown(1, 5)    
 async def info(ctx): #This will show some information about the bot
     log(content=f'info', user=ctx.message.author)
-    await ctx.send('| MineKrypt\'s Assistant | Prefix: , | Made for DisRoom™ | v1.13')
+    await ctx.send('MineKrypt\'s Assistant | Prefix: , | Made for DisRoom™ | v1.13')
 
 @client.command(brief='Displays the invite code.', aliases=('invite', 'i'))
 @commands.cooldown(1, 30)
@@ -196,14 +199,14 @@ async def serverinfo(ctx): #This will get information about the server
 
 @client.command(aliases=('search', 'google'))
 @commands.cooldown(1, 30)
-async def find(ctx,*, query): #This will retrieve google results for a query
+async def find(ctx,*, query):
     log(content=f'find with query={query}', user=ctx.message.author)
 
     author = ctx.author.mention
     await ctx.channel.send(f'Here are the links related to your question {author} ! *Query: "{query}"*')
     async with ctx.typing():
         for j in search(query, tld="com", num=3, stop=3, pause=2):
-            await ctx.send(f"\n:zap: | {j}")
+            await ctx.send(f"\n:point_right: | {j}")
     cooldown()
 
 @client.command()
@@ -264,7 +267,7 @@ async def stop(ctx): #This will stop the bot's process
    await client.close()
 
 
-#FixMe
+#TODO: Fix this CRAP
 # @client.command()
 # @commands.check(is_owner)
 # async def logs(lines=10)
