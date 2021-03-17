@@ -1,7 +1,7 @@
 import discord #Discord.py
 import requests #Web requests
 import json #Parse json
-import os #osrm -rf .git
+import os #os
 import pathlib #Reach files
 import psutil #OS info
 import platform #OS info
@@ -112,10 +112,10 @@ async def newrole(ctx, name=None, times=1):
             await ctx.message.guild.create_role(name)
 
 @client.command()
-@commands.cooldown(1, 5)    
+@commands.cooldown(1, 5)
 async def info(ctx): #This will show some information about the bot
     log(content=f'info', user=ctx.message.author)
-    await ctx.send('MineKrypt\'s Assistant | Prefix: , | Made for DisRoom™ | v1.13')
+    await ctx.send('MineKrypt\'s Assistant | Prefix: , | Made for DisRoom™ | v1.3')
 
 @client.command(brief='Displays the invite code.', aliases=('invite', 'i'))
 @commands.cooldown(1, 30)
