@@ -75,7 +75,9 @@ async def on_command_error(ctx, error):
     if isinstance(error, CommandNotFound):
         await ctx.send('Command not recognised!')
         return
-    raise error
+
+    elif isinstance(error, commands.errors.NSFWChannelRequired):
+        await ctx.send('That command can only be used in NSFW channels!')
 
 #! Commands
 
@@ -197,7 +199,10 @@ async def serverinfo(ctx): #This will get information about the server
     await ctx.send(embed=embed)
     cooldown()
 
+
+
 @client.command(aliases=('search', 'google'))
+@commands.is_nsfw()
 @commands.cooldown(1, 30)
 async def find(ctx,*, query):
     log(content=f'find with query={query}', user=ctx.message.author)
@@ -208,6 +213,8 @@ async def find(ctx,*, query):
         for j in search(query, tld="com", num=3, stop=3, pause=2):
             await ctx.send(f"\n:point_right: | {j}")
     cooldown()
+
+
 
 @client.command()
 @commands.cooldown(1, 30)
@@ -266,6 +273,10 @@ async def stop(ctx): #This will stop the bot's process
     log(content=f'stop', user=ctx.message.author)
     await ctx.send("Attention: I have been murdered.")
     await client.close()
+
+@client.command()
+async def gh(ctx):
+    await ctx.send('https://github.com/MineKrypt')
 
 @client.command()
 async def socks(ctx):
@@ -349,6 +360,13 @@ async def eightball(ctx, *, query=None):
 #         block_number -= 1
 #     all_read_text = b''.join(reversed(blocks))
 #     return b'\n'.join(all_read_text.splitlines()[-total_lines_wanted:])
+
+@client.event
+async def on_message(message):
+    if (message.author.bot):
+        return
+    await client.process_commands(message)
+
 
 startTime = datetime.utcnow()
 tokenFile = open(realPath/r'token.txt', 'r')
